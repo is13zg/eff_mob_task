@@ -1,23 +1,26 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict, Any
 
-from sqlalchemy import Integer, TIMESTAMP, func
+from  sqlalchemy import Integer, DateTime, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, declared_attr
 from db.session import engine
 from sqlalchemy.ext.asyncio import AsyncAttrs
-
-
 
 
 class Base(AsyncAttrs, DeclarativeBase):
     __abstract__ = True
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("timezone('utc', now())"),
+        nullable=False,
+    )
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True),
+        server_default=text("timezone('utc', now())"),
+        server_onupdate=text("timezone('utc', now())"),
+        nullable=False,
     )
 
     @declared_attr

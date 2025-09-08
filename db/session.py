@@ -2,14 +2,16 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from config import settings
 
 engine = create_async_engine(
-    url=settings.DATABASE_URL,
-    echo=True
+    url=settings.ASYNC_DATABASE_URL,
+    echo=True,
+    pool_pre_ping=True
 )
 async_session = async_sessionmaker(
     engine,
     expire_on_commit=False,
     class_=AsyncSession
 )
+
 
 async def get_session() -> AsyncSession:
     session = async_session()
@@ -20,4 +22,3 @@ async def get_session() -> AsyncSession:
         raise
     finally:
         await session.close()
-
