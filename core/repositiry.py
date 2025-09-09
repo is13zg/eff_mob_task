@@ -1,12 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User
-from sqlalchemy import select
+from sqlalchemy import select, update
+
 
 
 async def create_user(db: AsyncSession, name: str, last_name: str, father_name: str, email: str,
                       hashed_passwd: str) -> User:
     user = User(name=name, father_name=father_name, last_name=last_name, email=email, passwd=hashed_passwd)
     db.add(user)
+    await db.flush()
     return user
 
 
@@ -14,3 +16,25 @@ async def get_user_by_email(db: AsyncSession, email: str) -> User:
     res = await db.execute(select(User).where(User.email == email))
     user = res.scalar_one()
     return user
+
+
+async def get_user_by_id(db: AsyncSession, id: int) -> User:
+    res = await db.execute(select(User).where(User.id == id))
+    user = res.scalar_one()
+    return user
+
+
+async def delete_user_by_id(db: AsyncSession, user_id: int) -> None:
+    res = await db.execute(update(User).where(User.id == user_id).values(is_active=False).returning(User))
+    print(f"{res.scalar()=}")
+
+
+revoked_jtis = set()
+
+
+def add_revoked_jti(jti: str) -> None:
+    revoked_jtis.add(jti)
+
+
+def is_revoked_jti(jti: str) -> bool:
+    return jti in revoked_jtis

@@ -12,3 +12,7 @@ class User(Base):
     passwd: Mapped[str]
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
+    def __repr__(self) -> str:
+        """Строковое представление объекта для удобства отладки."""
+        return f"<{self.__class__.__name__}({self.id=}, {self.email=}, {self.is_active=})>"
+
