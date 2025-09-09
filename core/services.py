@@ -5,7 +5,6 @@ from core.repositiry import create_user, get_user_by_email
 from core.errors import InvalidCredentials, UserBlocked
 from sqlalchemy.exc import NoResultFound
 from models.user import User
-from schemas.user import TokenOut
 
 
 async def register(db: AsyncSession, name: str, last_name: str, father_name: str, email: str,

@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from core.services import register, login
 from core.errors import InvalidCredentials, UserBlocked
 
-user_router = APIRouter(prefix="/user", tags=["Работа с пользователем", ])
+user_router = APIRouter(prefix="/user", tags=["Work with user", ])
 
 
 @user_router.post("/register")
@@ -39,7 +39,6 @@ async def login_user(user_login: UserLogin, db: AsyncSession = Depends(get_sessi
     except UserBlocked:
         raise HTTPException(status_code=403, detail="User blocker")
     except Exception as e:
-        print("------- ", e, "-------------")
         raise HTTPException(status_code=500, detail="Login error")
 
     return TokenOut(access_token=token)
