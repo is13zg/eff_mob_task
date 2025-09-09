@@ -1,23 +1,45 @@
 from fastapi import APIRouter, Depends
-from schemas.user import UserRegister, UserOut
+from schemas.user import UserRegister, UserOut, UserLogin, TokenOut
 from db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.user import User
+from asyncpg.exceptions import UniqueViolationError
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException
+from core.services import register, login
+from core.errors import InvalidCredentials, UserBlocked
 
 user_router = APIRouter(prefix="/user", tags=["Работа с пользователем", ])
 
 
 @user_router.post("/register")
-async def register_user(user: UserRegister, db: AsyncSession = Depends(get_session)) -> UserOut:
-    nu = User(name=user.name,
-              last_name=user.last_name,
-              father_name=user.father_name,
-              email=user.email,
-              passwd=user.passwd)
-    db.add(nu)
-    await db.commit()
-    return UserOut(id=1, name="lol")
+async def register_user(get_user: UserRegister, db: AsyncSession = Depends(get_session)) -> UserOut:
+    try:
+        db_user = await register(db, **get_user.model_dump(exclude={'rep_passwd'}))
 
-    # проверить нет ли пользователя с таким емайлом
-    # проверить совпадение пароля
-    # добавить в базу получить Id
+    except IntegrityError as e:
+        await db.rollback()
+        is_unique_violation = (
+                isinstance(getattr(e, "orig", None), UniqueViolationError)
+                or getattr(getattr(e, "orig", None), "sqlstate", None) == "23505"
+        )
+        if is_unique_violation:
+            raise HTTPException(status_code=409, detail="Email already registered.")
+
+        raise HTTPException(status_code=500, detail="Database error.")
+
+    return UserOut(id=db_user.id, name=db_user.name)
+
+
+@user_router.post("/login")
+async def login_user(user_login: UserLogin, db: AsyncSession = Depends(get_session)) -> TokenOut:
+    try:
+        token = await login(db, user_login.email, user_login.passwd)
+    except InvalidCredentials:
+        raise HTTPException(status_code=401, detail="No correct user or password")
+    except UserBlocked:
+        raise HTTPException(status_code=403, detail="User blocker")
+    except Exception as e:
+        print("------- ", e, "-------------")
+        raise HTTPException(status_code=500, detail="Login error")
+
+    return TokenOut(access_token=token)
