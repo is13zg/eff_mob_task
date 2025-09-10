@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Any
 
-from  sqlalchemy import Integer, DateTime, text
+from  sqlalchemy import Integer, DateTime, text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, declared_attr
 from db.session import engine
 from sqlalchemy.ext.asyncio import AsyncAttrs
@@ -18,11 +18,10 @@ class Base(AsyncAttrs, DeclarativeBase):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        server_default=text("timezone('utc', now())"),
-        server_onupdate=text("timezone('utc', now())"),
+        server_default=func.now(),
+        onupdate=func.now(),
         nullable=False,
     )
-
     @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower() + 's'
