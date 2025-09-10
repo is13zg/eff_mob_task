@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
-from schemas.user import UserRegister, UserOut, UserLogin, TokenOut
+from schemas.user import UserRegister, UserOut, UserLogin, TokenOut, UserUpdate
 from db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from asyncpg.exceptions import UniqueViolationError
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from core.services import register, login, auth_user, logout, delete
+from core.services import register, login, auth_user, logout, delete, update
 from core.errors import InvalidCredentials, UserBlocked
 from fastapi import Depends
 from models.user import User
@@ -17,8 +17,7 @@ user_router = APIRouter(prefix="/user", tags=["Work with user", ])
 @user_router.post("/register")
 async def register_user(get_user: UserRegister, db: AsyncSession = Depends(get_session)) -> UserOut:
     try:
-        async with db.begin():
-            db_user = await register(db, **get_user.model_dump(exclude={'rep_passwd'}))
+        db_user = await register(db, **get_user.model_dump(exclude={'rep_passwd'}))
 
     except IntegrityError as e:
         is_unique_violation = (
@@ -52,6 +51,25 @@ async def logout_user(auth: Tuple[User, str] = Depends(auth_user)) -> dict:
     logout(jti)
 
     return {"message": f"user {user.id=} logout", "status": "ok"}
+
+
+@user_router.post("/update")
+async def update_user(user_update: UserUpdate, auth: Tuple[User, str] = Depends(auth_user),
+                      db: AsyncSession = Depends(get_session)) -> UserOut:
+    user, jti = auth
+    try:
+        new_user = await update(user.id, db, user_update.model_dump(exclude_unset=True, exclude={"rep_passwd"}))
+
+    except IntegrityError as e:
+        is_unique_violation = (
+                isinstance(getattr(e, "orig", None), UniqueViolationError)
+                or getattr(getattr(e, "orig", None), "sqlstate", None) == "23505"
+        )
+        if is_unique_violation:
+            raise HTTPException(status_code=409, detail="Email already registered.")
+
+        raise HTTPException(status_code=500, detail="Database error.")
+    return UserOut(id=new_user.id, name=new_user.name)
 
 
 @user_router.delete("/delete")

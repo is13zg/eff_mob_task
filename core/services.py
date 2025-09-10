@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security import make_hash, check_hash, gen_token, decode_token
 from core.repositiry import create_user, get_user_by_email, get_user_by_id, is_revoked_jti, add_revoked_jti, \
-    delete_user_by_id
+    delete_user_by_id, update_user_by_id
 from core.errors import InvalidCredentials, UserBlocked
 from sqlalchemy.exc import NoResultFound
 from models.user import User
@@ -55,7 +55,6 @@ async def login(db: AsyncSession, email: str,
         raise InvalidCredentials
     print(f"{user=}")
 
-
     if not user.is_active:
         raise UserBlocked
 
@@ -69,3 +68,13 @@ def logout(jti: str) -> None:
 async def delete(user_id: int, jti: str, db: AsyncSession) -> None:
     logout(jti)
     await delete_user_by_id(db, user_id)
+
+
+async def update(user_id: int, db: AsyncSession, values: dict) -> User:
+    if "passwd" in values.keys():
+        values["passwd"] = make_hash(values["passwd"])
+
+    res = await update_user_by_id(db, user_id, values)
+    print(f"{values=}")
+    print(f"{res=}")
+    return res
