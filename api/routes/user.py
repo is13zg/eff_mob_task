@@ -7,7 +7,6 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from core.services import register, login, auth_user, logout, delete, update
 from core.errors import InvalidCredentials, UserBlocked
-from fastapi import Depends
 from models.user import User
 from typing import Tuple
 

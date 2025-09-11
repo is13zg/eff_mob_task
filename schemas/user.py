@@ -5,8 +5,9 @@ from typing import Optional
 
 STR_20 = Annotated[str, Field(..., max_length=20)]
 PASSWORD = Annotated[str, Field(..., min_length=6, max_length=30)]
-STR_20_OP = Annotated[Optional[str], Field(max_length=20, default=None)]
-PASSWORD_OP = Annotated[Optional[str], Field(min_length=6, max_length=30, default=None)]
+STR_20_OP = Annotated[str | None, Field(max_length=20, default=None)]
+PASSWORD_OP = Annotated[str | None, Field(min_length=6, max_length=30, default=None)]
+
 
 
 class UserLogin(BaseModel):

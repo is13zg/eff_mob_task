@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security import make_hash, check_hash, gen_token, decode_token
-from core.repositiry import create_user, get_user_by_email, get_user_by_id, is_revoked_jti, add_revoked_jti, \
+from core.repository import create_user, get_user_by_email, get_user_by_id, is_revoked_jti, add_revoked_jti, \
     delete_user_by_id, update_user_by_id
 from core.errors import InvalidCredentials, UserBlocked
 from sqlalchemy.exc import NoResultFound
