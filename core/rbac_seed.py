@@ -2,7 +2,7 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-ACTIONS = ("create", "read", "update", "delete")
+
 
 async def seed_rbac_minimal(db: AsyncSession) -> None:
     await db.execute(text("""
