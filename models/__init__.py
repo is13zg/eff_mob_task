@@ -1,6 +1,6 @@
 # models/__init__.py
 from .user import User
-from .products import Product
+from .product import Product
 from .role import Role, UserRole, RoleElementAccess
 from .recourse import RecourseElement
 

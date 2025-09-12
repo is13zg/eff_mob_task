@@ -8,6 +8,8 @@ class Product(Base, PkMixin, TimestampMixin):
     __tablename__ = "products"
     name: Mapped[str] = mapped_column(String(30), nullable=False)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    count: Mapped[int] = mapped_column(nullable=False, default=0)
+    price: Mapped[float] = mapped_column(nullable=False, default=0)
 
     owner: Mapped["User"] = relationship(
         back_populates="products",

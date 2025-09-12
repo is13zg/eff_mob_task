@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
 from api.routes.user import user_router
+from api.routes.product import product_router
 from db.session import get_session, engine, async_session
 
 from sqlalchemy import inspect, text
@@ -34,6 +35,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(user_router)
+app.include_router(product_router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)
