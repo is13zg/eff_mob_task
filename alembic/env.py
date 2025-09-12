@@ -5,7 +5,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from db.base import Base
-from models.user import User #noqa
+from models import *  # noqa
+
 from config import settings
 
 from alembic import context
@@ -17,7 +18,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.ASYNC_DATABASE_URL + "?async_fallback=True")
+config.set_main_option("sqlalchemy.url", settings.SYNC_DATABASE_URL )
 target_metadata = Base.metadata
 
 

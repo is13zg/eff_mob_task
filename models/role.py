@@ -12,23 +12,25 @@ class ActionEnum(str, enum.Enum):
     delete = "delete"
 
 
-class LevelEnun(str, enum.Enum):
+class LevelEnum(str, enum.Enum):
     none = "none"
     own = "own"
     all = "all"
 
 
 class Role(Base, PkMixin):
-    name: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
-    users: Mapped[List['User']] = relationship(
+    __tablename__ = "roles"
+    name: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
+
+    users: Mapped[List["User"]] = relationship(
         secondary="user_roles",
         back_populates="roles",
-        lazy="selectin"
+        lazy="selectin",
     )
-    acces_rule: Mapped[List['RoleElementAcces']] = relationship(
+    access_rule: Mapped[List["RoleElementAccess"]] = relationship(
         back_populates="role",
         cascade="all, delete-orphan",
-        lazy="selectin"
+        lazy="selectin",
     )
 
 
@@ -38,18 +40,18 @@ class UserRole(Base):
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True)
 
 
-class RoleElementAcces(Base):
+class RoleElementAccess(Base):
     __tablename__ = "role_element_access"
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True)
-    element_id: Mapped[int] = mapped_column(ForeignKey("elements.id", ondelete="CASCADE"), primary_key=True)
+    element_id: Mapped[int] = mapped_column(ForeignKey("recourse_elements.id", ondelete="CASCADE"), primary_key=True)
     action: Mapped[ActionEnum] = mapped_column(default=ActionEnum.read, primary_key=True)
-    level: Mapped[LevelEnun] = mapped_column(default=LevelEnun.none, nullable=False)
+    level: Mapped[LevelEnum] = mapped_column(default=LevelEnum.none, nullable=False)
 
-    role: Mapped['Role'] = relationship(
-        back_populates='acces_rule',
-        lazy="joined"
-    )
-    element: Mapped['ResourceElement'] = relationship(
-        back_populates='acces_rule',
-        lazy="joined"
-    )
+    role: Mapped["Role"] = relationship(back_populates="access_rule", lazy="joined")
+    element: Mapped["RecourseElement"] = relationship(back_populates="access_rule", lazy="joined")
+
+
+
+
+
+

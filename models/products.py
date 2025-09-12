@@ -5,16 +5,16 @@ from db.base import Base, PkMixin, TimestampMixin
 
 
 class Product(Base, PkMixin, TimestampMixin):
-    name: Mapped[str] = mapped_column(String(30))
+    __tablename__ = "products"
+    name: Mapped[str] = mapped_column(String(30), nullable=False)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
-
-    owner : Mapped['User'] = relationship(
+    owner: Mapped["User"] = relationship(
         back_populates="products",
         lazy="joined",
-        cascade="all, delete-orphan"
+
     )
 
     def __repr__(self) -> str:
         """Строковое представление объекта для удобства отладки."""
-        return f"<{self.__class__.__name__}({self.id=}, {self.name=}, {self.name=})>"
+        return f"<{self.__class__.__name__}({self.id=}, {self.name=}, {self.owner_id=})>"
