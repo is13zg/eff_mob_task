@@ -1,20 +1,23 @@
 from fastapi import APIRouter, Depends
-from schemas.user import UserRegister, UserOut, UserLogin, TokenOut, UserUpdate
-from schemas.product import Product
 from db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
-from asyncpg.exceptions import UniqueViolationError
-from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException
-from core.services import register, login, auth_user, logout, delete, update
-from core.errors import InvalidCredentials, UserBlocked
+from core.services.user import auth_user
 from models.user import User
+from schemas.product import ProductIn, ProductOut
+from core.permisions import check_permission
+from core.services.product import create_product
 from typing import Tuple
 
 product_router = APIRouter(prefix="/products", tags=["Work with products", ])
 
-@product_router.get("/")
-async def get_products(user: User = Depends(auth_user), db: AsyncSession = Depends(get_session)) ->Product:
+ELEMENT_NAME = "products"
 
 
-
+@product_router.post("/")
+async def create(
+        data: ProductIn, auth: Tuple[User, str] = Depends(auth_user), db: AsyncSession = Depends(get_session),
+) -> ProductOut:
+    user, jti = auth
+    await check_permission(db, user, element_name=ELEMENT_NAME, action="create")
+    product_db = await create_product(user, data, db)
+    return ProductOut.model_validate(product_db)

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from asyncpg.exceptions import UniqueViolationError
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from core.services import register, login, auth_user, logout, delete, update
+from core.services.user import register, login, auth_user, logout, delete, update
 from core.errors import InvalidCredentials, UserBlocked
 from models.user import User
 from typing import Tuple
@@ -38,7 +38,8 @@ async def login_user(user_login: UserLogin, db: AsyncSession = Depends(get_sessi
         raise HTTPException(status_code=401, detail="No correct user or password")
     except UserBlocked:
         raise HTTPException(status_code=403, detail="User blocked")
-    except Exception:
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Login error")
 
     return TokenOut(access_token=token)

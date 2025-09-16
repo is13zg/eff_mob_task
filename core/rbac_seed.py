@@ -16,6 +16,8 @@ async def seed_rbac_minimal(db: AsyncSession) -> None:
         ON CONFLICT (name) DO NOTHING;
     """))
 
+
+
     # admin -> all
     await db.execute(text("""
             INSERT INTO role_element_access (role_id, element_id, action, level)

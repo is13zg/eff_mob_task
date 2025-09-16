@@ -12,9 +12,13 @@ async def create_user(db: AsyncSession, name: str, last_name: str, father_name: 
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User:
-    res = await db.execute(select(User).where(User.email == email))
-    user = res.scalar_one()
-    return user
+    try:
+        res = await db.execute(select(User).where(User.email == email))
+        user = res.scalar_one()
+        return user
+    except Exception as e:
+        print("DB EXEC EXECEP: ", e)
+
 
 
 async def get_user_by_id(db: AsyncSession, id: int) -> User:
@@ -22,13 +26,11 @@ async def get_user_by_id(db: AsyncSession, id: int) -> User:
     user = res.scalar_one()
     return user
 
-
 async def delete_user_by_id(db: AsyncSession, user_id: int) -> None:
     res = await db.execute(
         update(User).where(User.id == user_id).values(is_active=False).returning(User.id, User.is_active))
     await db.commit()
     print(f"{res.fetchall()=}")
-
 
 async def update_user_by_id(db: AsyncSession, user_id: int, values: dict) -> User:
     res = await db.execute(
@@ -38,16 +40,3 @@ async def update_user_by_id(db: AsyncSession, user_id: int, values: dict) -> Use
     await db.commit()
     print(f"{user=}")
     return user
-
-
-
-
-revoked_jtis = set()
-
-
-def add_revoked_jti(jti: str) -> None:
-    revoked_jtis.add(jti)
-
-
-def is_revoked_jti(jti: str) -> bool:
-    return jti in revoked_jtis
