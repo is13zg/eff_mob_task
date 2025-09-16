@@ -14,13 +14,13 @@ _level_rank = {LevelEnum.none: 0,
 
 def _to_action(action: Action) -> ActionEnum:
     try:
-        ActionEnum(action)
+        return ActionEnum(action)
     except Exception:
         raise HTTPException(status_code=400, detail="Неверное действие")
 
 
 async def get_effictive_level(db: AsyncSession, user: User, element_name: str, action: Action) -> LevelEnum:
-    if not user or user.is_active:
+    if not user or not user.is_active:
         return LevelEnum.none
 
     elem_id = await db.scalar(select(RecourseElement.id).where(RecourseElement.name == element_name))
@@ -46,7 +46,7 @@ async def get_effictive_level(db: AsyncSession, user: User, element_name: str, a
 
 
 async def has_read_all(db: AsyncSession, user: User, element_name: str) -> bool:
-    return get_effictive_level(db, user, element_name, "read") == LevelEnum.all
+    return await get_effictive_level(db, user, element_name, "read") == LevelEnum.all
 
 
 async def check_permission(
@@ -56,12 +56,12 @@ async def check_permission(
         action: Action,
         object_owner_id: Optional[int] = None,
 ) -> None:
+    if action == "create":
+        return
+
     lvl = await get_effictive_level(db, user, element_name, action)
     if lvl == LevelEnum.none:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
-
-    if action == "create":
-        return
 
     if object_owner_id is None:
         raise HTTPException(status_code=400, detail="No recourse owner")

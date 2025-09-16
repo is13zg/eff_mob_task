@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy import select
 from core.security import make_hash, check_hash, gen_token, decode_token
 from core.repository.user import create_user, get_user_by_email, get_user_by_id, delete_user_by_id, update_user_by_id
 from core.repository.jwt import is_revoked_jti, add_revoked_jti
@@ -11,6 +11,7 @@ from fastapi import Depends
 from db.session import get_session
 from fastapi import HTTPException
 from typing import Tuple
+from models.role import Role
 
 security = HTTPBearer(auto_error=False)
 
@@ -41,6 +42,13 @@ async def register(db: AsyncSession, name: str, last_name: str, father_name: str
                    passwd: str) -> User:
     hash_passwd = make_hash(passwd)
     user = await create_user(db, name, last_name, father_name, email, hash_passwd)
+
+    result = await db.execute(select(Role).where(Role.name == "admin"))
+    role = result.scalar_one_or_none()
+    await db.refresh(user, attribute_names=["roles"])
+    user.roles.append(role)
+
+    await db.commit()
     return user
 
 

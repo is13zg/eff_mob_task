@@ -7,17 +7,15 @@ async def create_user(db: AsyncSession, name: str, last_name: str, father_name: 
                       hashed_passwd: str) -> User:
     user = User(name=name, father_name=father_name, last_name=last_name, email=email, passwd=hashed_passwd)
     db.add(user)
-    await db.commit()
     return user
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User:
-    try:
-        res = await db.execute(select(User).where(User.email == email))
-        user = res.scalar_one()
-        return user
-    except Exception as e:
-        print("DB EXEC EXECEP: ", e)
+
+    res = await db.execute(select(User).where(User.email == email))
+    user = res.scalar_one()
+    return user
+
 
 
 

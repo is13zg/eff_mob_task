@@ -3,6 +3,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationInfo, model_validator
 from typing import Optional
 
+
 STR_20 = Annotated[str, Field(..., max_length=20)]
 PASSWORD = Annotated[str, Field(..., min_length=6, max_length=30)]
 STR_20_OP = Annotated[str | None, Field(max_length=20, default=None)]

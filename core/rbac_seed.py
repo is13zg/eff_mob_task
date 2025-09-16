@@ -16,6 +16,21 @@ async def seed_rbac_minimal(db: AsyncSession) -> None:
         ON CONFLICT (name) DO NOTHING;
     """))
 
+    await db.execute(text("""
+            INSERT INTO roles (name)
+            SELECT 'user'
+            WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'user');
+        """))
+    await db.execute(text("""
+            INSERT INTO user_roles (user_id, role_id)
+            SELECT u.id, r.id
+            FROM users u
+            CROSS JOIN (SELECT id FROM roles WHERE name = 'user') r
+            WHERE NOT EXISTS (
+                SELECT 1 FROM user_roles ur WHERE ur.user_id = u.id AND ur.role_id = r.id
+            );
+        """))
+
 
 
     # admin -> all
