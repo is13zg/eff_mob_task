@@ -5,6 +5,17 @@ from models.product import Product
 from core.repository.product import create_product_in_db, get_all_products_from_db, get_own_products_from_db, \
     get_product_from_db, update_product_in_db, delete_product_from_db
 from typing import List
+from typing import Annotated
+from fastapi import Path, Depends, HTTPException
+from db.session import get_session
+
+
+async def get_product_or_404(product_id: Annotated[int, Path(ge=1)],
+                             db: AsyncSession = Depends(get_session)) -> Product:
+    product = await get_prod_by_id(product_id, db)
+    if not product:
+        raise HTTPException(status_code=404, detail="Not found")
+    return product
 
 
 async def create_product(user: User, data: ProductIn, db: AsyncSession) -> ProductOut:
