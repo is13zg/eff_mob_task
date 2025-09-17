@@ -43,11 +43,13 @@ async def register(db: AsyncSession, name: str, last_name: str, father_name: str
     hash_passwd = make_hash(passwd)
     user = await create_user(db, name, last_name, father_name, email, hash_passwd)
 
-    result = await db.execute(select(Role).where(Role.name == "admin"))
+    result = await db.execute(select(Role).where(Role.name == "user"))
     role = result.scalar_one_or_none()
+    if role is None:
+        raise HTTPException(status_code=500, detail="Base role 'user' not seeded")
+
     await db.refresh(user, attribute_names=["roles"])
     user.roles.append(role)
-
     await db.commit()
     return user
 
@@ -61,7 +63,6 @@ async def login(db: AsyncSession, email: str,
 
     if not check_hash(passwd, user.passwd):
         raise InvalidCredentials
-    print(f"{user=}")
 
     if not user.is_active:
         raise UserBlocked
@@ -76,6 +77,7 @@ def logout(jti: str) -> None:
 async def delete(user_id: int, jti: str, db: AsyncSession) -> None:
     logout(jti)
     await delete_user_by_id(db, user_id)
+    await db.commit()
 
 
 async def update(user_id: int, db: AsyncSession, values: dict) -> User:
@@ -83,6 +85,5 @@ async def update(user_id: int, db: AsyncSession, values: dict) -> User:
         values["passwd"] = make_hash(values["passwd"])
 
     res = await update_user_by_id(db, user_id, values)
-    print(f"{values=}")
-    print(f"{res=}")
+    await db.commit()
     return res

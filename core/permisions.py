@@ -19,7 +19,7 @@ def _to_action(action: Action) -> ActionEnum:
         raise HTTPException(status_code=400, detail="Неверное действие")
 
 
-async def get_effictive_level(db: AsyncSession, user: User, element_name: str, action: Action) -> LevelEnum:
+async def get_effective_level(db: AsyncSession, user: User, element_name: str, action: Action) -> LevelEnum:
     if not user or not user.is_active:
         return LevelEnum.none
 
@@ -39,14 +39,14 @@ async def get_effictive_level(db: AsyncSession, user: User, element_name: str, a
                     RoleElementAccess.action == action_enum)
                )
     )
-    rows = await db.scalars(q)
+    rows = (await db.scalars(q)).all()
     if not rows:
         return LevelEnum.none
     return max(rows, key=lambda lv: _level_rank[lv])
 
 
 async def has_read_all(db: AsyncSession, user: User, element_name: str) -> bool:
-    return await get_effictive_level(db, user, element_name, "read") == LevelEnum.all
+    return await get_effective_level(db, user, element_name, "read") == LevelEnum.all
 
 
 async def check_permission(
@@ -59,7 +59,7 @@ async def check_permission(
     if action == "create":
         return
 
-    lvl = await get_effictive_level(db, user, element_name, action)
+    lvl = await get_effective_level(db, user, element_name, action)
     if lvl == LevelEnum.none:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
 

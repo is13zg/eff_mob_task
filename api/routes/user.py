@@ -16,7 +16,7 @@ user_router = APIRouter(prefix="/user", tags=["Work with user", ])
 @user_router.post("/register")
 async def register_user(get_user: UserRegister, db: AsyncSession = Depends(get_session)) -> UserOut:
     try:
-        db_user = await register(db, **get_user.model_dump(exclude={'rep_passwd'}))
+        new_user = await register(db, **get_user.model_dump(exclude={'rep_passwd'}))
 
     except IntegrityError as e:
         is_unique_violation = (
@@ -27,7 +27,7 @@ async def register_user(get_user: UserRegister, db: AsyncSession = Depends(get_s
             raise HTTPException(status_code=409, detail="Email already registered.")
 
         raise HTTPException(status_code=500, detail="Database error.")
-    return UserOut(id=db_user.id, name=db_user.name)
+    return UserOut.from_orm(new_user)
 
 
 @user_router.post("/login")
@@ -49,7 +49,6 @@ async def login_user(user_login: UserLogin, db: AsyncSession = Depends(get_sessi
 async def logout_user(auth: Tuple[User, str] = Depends(auth_user)) -> dict:
     user, jti = auth
     logout(jti)
-
     return {"message": f"user {user.id=} logout", "status": "ok"}
 
 
@@ -58,7 +57,7 @@ async def update_user(user_update: UserUpdate, auth: Tuple[User, str] = Depends(
                       db: AsyncSession = Depends(get_session)) -> UserOut:
     user, jti = auth
     try:
-        new_user = await update(user.id, db, user_update.model_dump(exclude_unset=True, exclude={"rep_passwd"}))
+        upd_user = await update(user.id, db, user_update.model_dump(exclude_unset=True, exclude={"rep_passwd"}))
 
     except IntegrityError as e:
         is_unique_violation = (
@@ -69,7 +68,7 @@ async def update_user(user_update: UserUpdate, auth: Tuple[User, str] = Depends(
             raise HTTPException(status_code=409, detail="Email already registered.")
 
         raise HTTPException(status_code=500, detail="Database error.")
-    return UserOut(id=new_user.id, name=new_user.name)
+    return UserOut.from_orm(upd_user)
 
 
 @user_router.delete("/delete")

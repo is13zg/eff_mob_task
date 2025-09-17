@@ -28,7 +28,7 @@ async def get_product_from_db(prod_id: int, db: AsyncSession) -> Product:
 
 async def update_product_in_db(data: dict, prod_id: int, db: AsyncSession) -> Product:
     res = await db.execute(update(Product).where(Product.id == prod_id).values(**data).returning(Product))
-    return res.scalar()
+    return res.scalar_one_or_none()
 
 
 async def delete_product_from_db(product_id: int, db: AsyncSession) -> None:

@@ -52,9 +52,7 @@ async def update(data: ProductUpdate,
                  ) -> ProductOut:
     user, jti = auth
     await check_permission(db, user, element_name=ELEMENT_NAME, action="update", object_owner_id=product.owner_id)
-    upd_prod = await update_product(data.model_dump(exclude_unset=True), product.id, db)
-
-    return ProductOut.from_orm(upd_prod)
+    return await update_product(data.model_dump(exclude_unset=True), product.id, db)
 
 
 @product_router.delete("/{product_id}")
