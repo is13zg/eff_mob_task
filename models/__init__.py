@@ -2,7 +2,7 @@
 from .user import User
 from .product import Product
 from .role import Role, UserRole, RoleElementAccess
-from .recourse import RecourseElement
+from .resourse import ResourseElement
 
 __all__ = [
     "User",
@@ -10,5 +10,5 @@ __all__ = [
     "Role",
     "UserRole",
     "RoleElementAccess",
-    "RecourseElement",
+    "ResourseElement",
 ]

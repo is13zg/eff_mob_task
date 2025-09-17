@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User
 from sqlalchemy import select, and_
-from models.recourse import RecourseElement
+from models.resourse import ResourseElement
 
 Action = Literal["create", "read", "update", "delete"]
 _level_rank = {LevelEnum.none: 0,
@@ -23,7 +23,7 @@ async def get_effective_level(db: AsyncSession, user: User, element_name: str, a
     if not user or not user.is_active:
         return LevelEnum.none
 
-    elem_id = await db.scalar(select(RecourseElement.id).where(RecourseElement.name == element_name))
+    elem_id = await db.scalar(select(ResourseElement.id).where(ResourseElement.name == element_name))
 
     if elem_id is None:
         return LevelEnum.none
@@ -33,9 +33,9 @@ async def get_effective_level(db: AsyncSession, user: User, element_name: str, a
     q = (
         select(RoleElementAccess.level)
         .join(UserRole, UserRole.role_id == RoleElementAccess.role_id)
-        .join(RecourseElement, RecourseElement.id == RoleElementAccess.element_id)
+        .join(ResourseElement, ResourseElement.id == RoleElementAccess.element_id)
         .where(and_(UserRole.user_id == user.id,
-                    RecourseElement.id == elem_id,
+                    ResourseElement.id == elem_id,
                     RoleElementAccess.action == action_enum)
                )
     )

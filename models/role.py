@@ -43,12 +43,12 @@ class UserRole(Base):
 class RoleElementAccess(Base):
     __tablename__ = "role_element_access"
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True)
-    element_id: Mapped[int] = mapped_column(ForeignKey("recourse_elements.id", ondelete="CASCADE"), primary_key=True)
+    element_id: Mapped[int] = mapped_column(ForeignKey("resourse_elements.id", ondelete="CASCADE"), primary_key=True)
     action: Mapped[ActionEnum] = mapped_column(default=ActionEnum.read, primary_key=True)
     level: Mapped[LevelEnum] = mapped_column(default=LevelEnum.none, nullable=False)
 
     role: Mapped["Role"] = relationship(back_populates="access_rule", lazy="joined")
-    element: Mapped["RecourseElement"] = relationship(back_populates="access_rule", lazy="joined")
+    element: Mapped["ResourseElement"] = relationship(back_populates="access_rule", lazy="joined")
 
 
 

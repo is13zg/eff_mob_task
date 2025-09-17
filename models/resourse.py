@@ -4,8 +4,8 @@ from sqlalchemy import String
 from typing import List
 
 
-class RecourseElement(Base, PkMixin):
-    __tablename__ = "recourse_elements"
+class ResourseElement(Base, PkMixin):
+    __tablename__ = "resourse_elements"
     name: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
 
     access_rule: Mapped[List["RoleElementAccess"]] = relationship(

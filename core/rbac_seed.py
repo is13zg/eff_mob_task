@@ -8,8 +8,13 @@ async def seed_rbac_minimal(db: AsyncSession) -> None:
           ('admin'), ('user')
         ON CONFLICT (name) DO NOTHING;
     """))
+
     await db.execute(text("""
-        INSERT INTO recourse_elements (name)
+        ALTER TABLE recourse_elements RENAME TO resourse_elements;
+    """))
+
+    await db.execute(text("""
+        INSERT INTO resourse_elements (name)
         VALUES ('products')
         ON CONFLICT (name) DO NOTHING;
     """))
@@ -34,7 +39,7 @@ async def seed_rbac_minimal(db: AsyncSession) -> None:
             INSERT INTO role_element_access (role_id, element_id, action, level)
             SELECT r.id, e.id, acts.a, 'all'::levelenum
             FROM roles r
-            JOIN recourse_elements e ON e.name = 'products'
+            JOIN resourse_elements e ON e.name = 'products'
             CROSS JOIN (
             VALUES 
             ('create'::actionenum),
@@ -52,7 +57,7 @@ async def seed_rbac_minimal(db: AsyncSession) -> None:
             INSERT INTO role_element_access (role_id, element_id, action, level)
             SELECT r.id, e.id, acts.a, 'own'::levelenum
             FROM roles r
-            JOIN recourse_elements e ON e.name = 'products'
+            JOIN resourse_elements e ON e.name = 'products'
             CROSS JOIN (
             VALUES 
             ('create'::actionenum),
