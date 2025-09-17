@@ -1,4 +1,7 @@
+# need use redis or db
 revoked_jtis = set()
+
+
 
 
 def add_revoked_jti(jti: str) -> None:

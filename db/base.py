@@ -37,5 +37,4 @@ class Base(AsyncAttrs, DeclarativeBase):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __repr__(self) -> str:
-        """Строковое представление объекта для удобства отладки."""
         return f"<{self.__class__.__name__}(id={self.id}, created_at={self.created_at}, updated_at={self.updated_at})>"

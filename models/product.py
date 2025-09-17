@@ -18,5 +18,4 @@ class Product(Base, PkMixin, TimestampMixin):
     )
 
     def __repr__(self) -> str:
-        """Строковое представление объекта для удобства отладки."""
         return f"<{self.__class__.__name__}({self.id=}, {self.name=}, {self.owner_id=})>"

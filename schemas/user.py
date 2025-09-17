@@ -52,10 +52,8 @@ class UserUpdate(UserRegister):
 
     @model_validator(mode="after")
     def passwords_match(self):
-
         if (self.passwd is None) ^ (self.rep_passwd is None):
             raise ValueError("Need passwd and rep_passwd")
-
         if self.passwd is not None and self.passwd != self.rep_passwd:
             raise ValueError("passwords do not match")
         return self

@@ -1,7 +1,5 @@
-# services/rbac_seed.py
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-
 
 
 async def seed_rbac_minimal(db: AsyncSession) -> None:
@@ -31,8 +29,6 @@ async def seed_rbac_minimal(db: AsyncSession) -> None:
             );
         """))
 
-
-
     # admin -> all
     await db.execute(text("""
             INSERT INTO role_element_access (role_id, element_id, action, level)
@@ -52,7 +48,6 @@ async def seed_rbac_minimal(db: AsyncSession) -> None:
 
     """))
 
-    # user -> own
     await db.execute(text("""
             INSERT INTO role_element_access (role_id, element_id, action, level)
             SELECT r.id, e.id, acts.a, 'own'::levelenum
